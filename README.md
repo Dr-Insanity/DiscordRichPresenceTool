@@ -15,7 +15,10 @@ conclusion: **targeted audience;** somewhat experienced around webpanels and com
 - Latest Python version. Click [here](https://python/org) to download & install Python.
 
 - [`psutil`]()(Python external library / module)
-- [`pypresence`]() (Python external library / module)
+- [`pypresence`](https://github.com/qwertyquerty/pypresence) (Python external library / module)
+- any Terminal that **supports ANSI Escape codes**\
+\
+You are more than welcome to use any Terminal without ANSI Escape code support, of course. But it will be very unreadable. I **highly** suggest Powershell for Windows 8.1, 10, 11 users
 
 ## Installation
 *instructions are made for Windows users*\
