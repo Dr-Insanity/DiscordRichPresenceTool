@@ -1,8 +1,4 @@
 try:
-    # version
-    Version = "0.0.2"
-    Presence_of_remaining_junk_code = True # It's a joke, but yes really, there's some junk code I still need to cleanup
-
     class bcolors:
         HEADER = '\033[95m'
         OKBLUE = '\033[94m'
@@ -69,72 +65,35 @@ try:
                 print("                                                  ")
                 print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}pypresence {bcolors.OKGREEN}{bcolors.BOLD}INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}dependency checks {bcolors.OKGREEN}{bcolors.BOLD}Done!")
                 input("Hit enter to continue... ")
-
         check_pypresence()
 
-    config = ConfigParser(allow_no_value=True)
-
-    def ensureconfig():
-        """
-        reads in the config file and returns a bolean (true OR false)
-        """
-        # check 'n read, watch 'n learn
-        # The force is with those who read the source
-        try:
-            does_conf_exist = open('RPC_Config.ini', 'r')
-            if bool(does_conf_exist) == True:
-                return True
-                
-        except FileNotFoundError:
-            # Config doesn't exist, create now since it's safe.
-
-            config.read('RPC_Config.ini')
-            config.add_section('settings')
-            
-            # code snippet
-           # config.set('settings', 'disable-vc-notice')
-           # config.set('settings', 'disable-requirements-notice')
-           # config.set('settings', 'disable-button-notice')
-           # config.set('settings', 'disable-splashscreen') # aka Loader / loading screen / etc
-
-            with open('RPC_Config.ini', 'w') as f:
-                config.write(f)
-            return True
     def prompt_need_MSVC14orHigher():
         clear()
-        print(f"""{bcolors.TAG}{bcolors.BOLD}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
+        print(f"""
+{bcolors.TAG}{bcolors.BOLD}
+╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
 ║                  🎫     {bcolors.BOLD}Rich Presence Tool     🎫                 ║
 ║{bcolors.RED} THIS PROGRAM NEEDS MICROSOFT VISUAL BUILD TOOLS 14.0 OR HIGHER!!! {bcolors.TAG}║
 ║{bcolors.WHITE}                You can get it with the below link  {bcolors.TAG}               ║
 ║{bcolors.OKGREEN}   https://www.scivision.dev/python-windows-visual-c-14-required/ {bcolors.TAG} ║
 ║{bcolors.WHITE}{bcolors.UNBOLD}              Report broken links please! Thank you.               {bcolors.TAG}║
 ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-VERSION: {Version}
-
-{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE}{bcolors.UNBOLD}It's possible that you may already have this installed. Try to proceed.
 
 {bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE}{bcolors.UNBOLD}Discord Rich Presence Tool will continue to run, assuming you have this dependency installed
-{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE}{bcolors.UNBOLD}Settings will be stored at:
+            
+{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE}{bcolors.UNBOLD}You can disable this notice in the settings, which will be stored at:
 
-{bcolors.OKCYAN}{bcolors.BOLD}{os.getcwd()}
+{bcolors.WHITE}{bcolors.BOLD}{os.getcwd()}""")
 
-""")
-
-        # creating config now + all possible settings, overwritten by user, if preferenced, in the future
-        # firstly, try and read if it exists, we don't want to overwrite the current config file now, don't we?
-
-        confirm_understanding = input(f"{bcolors.YELLOW}I got this dependency {bcolors.OKGREEN}{bcolors.BOLD}installed {bcolors.UNBOLD}{bcolors.YELLOW}({bcolors.OKGREEN}{bcolors.BOLD}Y{bcolors.WHITE}{bcolors.UNBOLD}/{bcolors.RED}{bcolors.BOLD}N{bcolors.YELLOW}{bcolors.UNBOLD}){bcolors.WHITE}> ")
+        confirm_understanding = input(f"\n{bcolors.YELLOW}I understand I {bcolors.RED}NEED {bcolors.YELLOW}this {bcolors.RED}dependency {bcolors.YELLOW}installed and I know how to install this (Y/N)> ")
 
         if confirm_understanding.lower() == "y":
-            ensureconfig()
-            pass
+            dependency_checker()
 
         elif confirm_understanding.lower() == "n":
             print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE} Quitting application - Install {bcolors.RED}MICROSOFT VISUAL BUILD TOOLS 14.0 OR HIGHER!!!{bcolors.WHITE}")
             quit()
-
-        if ensureconfig() == True:
-            pass
+        elif confirm_understanding.lower() == "y --disable-vc-notice":
 
             dependency_checker()
 
@@ -144,6 +103,7 @@ VERSION: {Version}
     from pypresence import Presence
     from pypresence import exceptions
 
+    config = ConfigParser()
     apptag = f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}"
 
     def toomanyCharacters():
@@ -179,15 +139,14 @@ VERSION: {Version}
         else:
             clear()
             print(
-"""
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ❌    Invalid reply    ❌ ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-Your choices are:
-- (y)es - Set up buttons for my rich presence.
-- (n)o - Do not set up buttons on my rich presence.
-""")
-
+    """
+    ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
+    ║ ❌    Invalid reply    ❌ ║
+    ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+    Your choices are:
+    - (y)es - Set up buttons for my rich presence.
+    - (n)o - Do not set up buttons on my rich presence.
+                """)
             ASK_RPC_WantButtons()
     def ASK_RPC_NumbOfButtons():
         RPC_Buttons_HowMany = input(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}][{bcolors.OKGREEN}setup{bcolors.TAG}] {bcolors.UNBOLD}{bcolors.WHITE}How many buttons do you want on your rich presence? (1-2, choose one)>  {bcolors.OKGREEN}{bcolors.BOLD}")
@@ -257,19 +216,9 @@ Your choices are:
     def ask_rpc_2ndbutton_URL():
         RPC_Single_Button_LabelText = input(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}][{bcolors.OKGREEN}setup{bcolors.TAG}]{bcolors.TAG}[{bcolors.WHITE}2/2 button{bcolors.TAG}] {bcolors.UNBOLD}{bcolors.WHITE}Which URL shall be shared> {bcolors.OKGREEN}{bcolors.BOLD}")
         return RPC_Single_Button_LabelText
+    def ASK_RPC_Buttons():
 
-
-    def ASK_RPC_Buttons(): ### THIS IS THE JUNK CODE I keep as code snippet, for now. 
-        #Yes I am aware of other solutions. Thank you for your efforts to remind me, in case you wanted to do that. But no need :) I'm more comfortable with this way.
-        # I delete it once I have these parts in a similar use somewhere else in the code. :)
-        
-        """ # apparently a doc string / multiline string now? lol. It used to be a print, yes.
-
-        # I wrote all these explanations now, and took some time for it.
-        # so why not delete it now and work it off and be done with it?
-        # good point. I actually want to do something else, and at the same time willing to finish the feats off this day.
-
-        # help me, bored. or idk. Warning, focus significantly reduced by 90%. Help. What am I doing. Why am I doing this. WTF. I got ADHD. Someone slap me out of this nonsense. I snapped out of it myself.
+        """
         ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
         ║ ❌    Invalid reply    ❌ ║
         ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
@@ -293,47 +242,42 @@ Your choices are:
             config.write(f)
 
     def CompileConfig():
-        config.read('RPC_Config.ini')
-
         print(f"""{bcolors.TAG}{bcolors.BOLD}
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
-║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫       ║
-║ {bcolors.WHITE}You are going to set up a rich presence on your {bcolors.TAG}║
-║ {bcolors.WHITE}Discord profile. Be sure you have the following {bcolors.TAG}║
-║ {bcolors.WHITE}info ready to configure your rich presence with {bcolors.TAG}║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-{bcolors.WHITE}- Application ID, found at your 
-application at discord.com/developers/applications
-If you have no application, create one.
+            ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
+            ║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫       ║
+            ║ {bcolors.WHITE}You are going to set up a rich presence on your {bcolors.TAG}║
+            ║ {bcolors.WHITE}Discord profile. Be sure you have the following {bcolors.TAG}║
+            ║ {bcolors.WHITE}info ready to configure your rich presence with {bcolors.TAG}║
+            ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+            {bcolors.WHITE}- Application ID, found at your 
+            application at discord.com/developers/applications
+            If you have no application, create one.
 
-- An idea about what you want your friends / server 
-buddies to see on your Discord profile.
+            - An idea about what you want your friends / server 
+            buddies to see on your Discord profile.
 
--[OPTIONAL] Buttons with labels
-+ URLs to share is Required!!!
+            -[OPTIONAL] Buttons with labels
+            + URLs to share is Required!!!
 
-{bcolors.TAG}{bcolors.BOLD}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─╗
-║ {bcolors.WHITE}! ! Scroll UP to read from beginning ! ! {bcolors.TAG}║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─╝
-""")
-        optional_option = input(f"Hit enter to continue...")
-
+            {bcolors.TAG}{bcolors.BOLD}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─╗
+            ║ {bcolors.WHITE}! ! Scroll UP to read from beginning ! ! {bcolors.TAG}║
+            ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─╝
+            {bcolors.WHITE}
+            """)
+        input(f"{bcolors.UNBOLD}Hit enter to continue... ")
         rpc_title               = ASK_RPC_title()
         rpc_desc                = ASK_RPC_desc()
-
-        config.read('RPC_Config.ini')
         clear()
         print(
             f"""{bcolors.TAG}{bcolors.BOLD}
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
-║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫         ║
-║                                                   ║
-║{bcolors.WHITE} Setting buttons requires a URL you wish to share. {bcolors.TAG}║
-║{bcolors.WHITE}      If you have no URLs to share, you can now  {bcolors.TAG}  ║
-║{bcolors.WHITE}                  answer with "N"                {bcolors.TAG}  ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-
-""")
+            ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
+            ║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫         ║
+            ║                                                   ║
+            ║{bcolors.WHITE} Setting buttons requires a URL you wish to share. {bcolors.TAG}║
+            ║{bcolors.WHITE}      If you have no URLs to share, you can now  {bcolors.TAG}  ║
+            ║{bcolors.WHITE}                  answer with "N"                {bcolors.TAG}  ║
+            ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+    -       """)
         rpc_want_buttons   = ASK_RPC_WantButtons()
         try:
             config.add_section('RPC_details')
@@ -392,18 +336,12 @@ buddies to see on your Discord profile.
         try:
             open('RPC_Config.ini', 'r')
             
-            config.read("RPC_Config.ini")
-            if config.has_section("RPC_details"):
-                pass
-            elif not config.has_section("RPC_details"):
-                SetupNewRPC()
-                return
             print(
     f"""{bcolors.TAG}{bcolors.BOLD}
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
-║ 🎫  Rich Presence Tool  🎫  ║
-║ {bcolors.OKGREEN}A rich presence was set up !{bcolors.TAG}║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+    ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
+    ║ 🎫  Rich Presence Tool  🎫  ║
+    ║ {bcolors.OKGREEN}A rich presence was set up !{bcolors.TAG}║
+    ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
     """)
             YesOrNo = input(f"{bcolors.BOLD}{bcolors.TAG}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.WHITE}Do you wish to Use this or Change or View?\n{bcolors.YELLOW}1. {bcolors.OKGREEN}(Use)\n{bcolors.YELLOW}2. {bcolors.RED}(Change)\n{bcolors.YELLOW}3. {bcolors.OKCYAN}(View)\n\n{bcolors.TAG}Make a choice {bcolors.WHITE}({bcolors.OKGREEN}1 {bcolors.WHITE}/ {bcolors.RED}2 {bcolors.WHITE}/ {bcolors.OKCYAN}3{bcolors.WHITE})> {bcolors.OKGREEN}{bcolors.BOLD}")
 
@@ -472,9 +410,9 @@ buddies to see on your Discord profile.
                             clear()
                             print(
                         """
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ❌ Config file missing! please relaunch the application! ❌ ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+                        ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
+                        ║ ❌ Config file missing! please relaunch the application! ❌ ║
+                        ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
                         """)
                             time.sleep(5)
                             quit()
@@ -488,32 +426,33 @@ buddies to see on your Discord profile.
     def Q_ChangeRPC_InvalidReply():
         clear()
         print(
-"""
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ❌    Invalid reply    ❌ ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-Your choices are:
-- 1 (use)
-- 2 (change)
-- 3 (View the current Rich Presence)""")
+    """
+    ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
+    ║ ❌    Invalid reply    ❌ ║
+    ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+    Your choices are:
+    - 1 (use)
+    - 2 (change)
+    - 3 (View the current Rich Presence)""")
         time.sleep(3)
         ConfigCheck()
 
     def SplashScreen():
         clear()
         print(
-    f"""{bcolors.TAG}{bcolors.BOLD}
-    ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
-    ║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫           ║
-    ║ {bcolors.WHITE}Setting A Rich PresenCe on your profile, simplified {bcolors.TAG}║
-    ║                                                     ║
-    ║ {bcolors.RED}Not affiliated with {bcolors.BLURPLE}Discord Inc. {bcolors.RED}in any way         {bcolors.TAG}║
-    ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-    {bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.OKGREEN}Initialising . . .
+            f"""{bcolors.TAG}{bcolors.BOLD}
+            ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
+            ║          🎫     {bcolors.BOLD}Rich Presence Tool     🎫           ║
+            ║ {bcolors.WHITE}Setting A Rich PresenCe on your profile, simplified {bcolors.TAG}║
+            ║                                                     ║
+            ║ {bcolors.RED}Not affiliated with {bcolors.BLURPLE}Discord Inc. {bcolors.RED}in any way         {bcolors.TAG}║
+            ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
+            {bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.OKGREEN}Initialising . . .
             """)
 
         time.sleep(5) # give people the time to read front page of this CLI-based utility
         clear() # Clear the current terminal / CMD / Powershell Window
+        
         ConfigCheck()
 
     SplashScreen()
