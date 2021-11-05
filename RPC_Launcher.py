@@ -38,6 +38,8 @@ try:
             print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}attempting to use psutil")
             try: # try to import psutil, for checking if Discord is running, or not.
                 import psutil
+                print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}psutil was already {bcolors.OKGREEN}{bcolors.BOLD}INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}commencing other dependency checks...")
+                input("Hit enter to continue... ")
 
             except ImportError:
                 print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}psutil {bcolors.RED}{bcolors.BOLD}NOT INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}Attempting to install it for you...")
@@ -55,6 +57,8 @@ try:
             try:
                 from pypresence import Presence
                 from pypresence import exceptions
+                print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}pypresence was already {bcolors.OKGREEN}{bcolors.BOLD}INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}dependency checks {bcolors.OKGREEN}{bcolors.BOLD}Done!")
+                input("Hit enter to continue... ")
 
             except ImportError:
                 print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}pypresence {bcolors.RED}{bcolors.BOLD}NOT INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}Attempting to install it for you...")
