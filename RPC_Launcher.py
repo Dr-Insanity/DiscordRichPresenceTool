@@ -55,6 +55,8 @@ try:
 
         def check_pypresence():
             try:
+                print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}Checking if further dependencies are installed...")
+                print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}attempting to use pypresence")
                 from pypresence import Presence
                 from pypresence import exceptions
                 print(f"{bcolors.TAG}{bcolors.BOLD}[{bcolors.WHITE}Rich Presence{bcolors.TAG}] {bcolors.UNBOLD}pypresence was already {bcolors.OKGREEN}{bcolors.BOLD}INSTALLED!\n{bcolors.WHITE}{bcolors.UNBOLD}dependency checks {bcolors.OKGREEN}{bcolors.BOLD}Done!")
