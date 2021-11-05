@@ -138,6 +138,8 @@ VERSION: {Version}
 
             dependency_checker()
 
+    prompt_need_MSVC14orHigher()
+
     import psutil
     from pypresence import Presence
     from pypresence import exceptions
