@@ -1,0 +1,7 @@
+DiscordRPCT/__pycache__/
+requirements.txt
+RPC_Config.ini
+build
+.vscode
+dist
+*.spec
