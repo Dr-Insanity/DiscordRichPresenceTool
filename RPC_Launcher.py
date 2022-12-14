@@ -1,4 +1,4 @@
-from os import getcwd
+from os import getcwd, getenv
 from os.path import basename
 from sys import argv, exit
 import time
@@ -9,6 +9,8 @@ from DiscordRPCT.bcolors import Bcolors as col
 from DiscordRPCT.functs import Functs
 
 ranAs_Service = False
+appdata_folder = getenv('APPDATA')
+RCP_Config_dot_ini = f"{appdata_folder}/Discord-Rich-Presence-Tool/RPC_Config.ini"
 
 def prepArgs():
     if len(argv) == 1:
@@ -57,7 +59,7 @@ def prompt_need_MSVC14orHigher():
         
 {col.TAG}{col.BOLD}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}{col.UNBOLD}You can disable this notice in the settings, which will be stored at:
 
-{col.WHITE}{col.BOLD}{getcwd()}""")
+{col.WHITE}{col.BOLD}{RCP_Config_dot_ini}""")
 
     confirm_understanding = input(f"\n{col.YELLOW}I understand I {col.RED}NEED {col.YELLOW}this {col.RED}dependency {col.YELLOW}installed and I know how to install this (Y/N)> ")
 
@@ -202,15 +204,19 @@ def ASK_RPC_Buttons():
     if RPC_Buttons.lower() == "n":
         return
 
-    config.read('RPC_Config.ini')
+    config.read(RCP_Config_dot_ini)
 
-    with open('RPC_Config.ini', 'w') as f:
+    with open(RCP_Config_dot_ini, 'w') as f:
         config.write(f)
 
 def CompileConfig():
     print(f"""{col.TAG}{col.BOLD}
 ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗
 ║          🎫     {col.BOLD}Rich Presence Tool     🎫       ║
+║                                                 {col.TAG}║
+║      {col.YELLOW}{col.BOLD}It appears this is your first launch       {col.TAG}║
+║      {col.YELLOW}{col.BOLD}Or you've deleted your config file         {col.TAG}║
+║                                                 ║
 ║ {col.WHITE}You are going to set up a rich presence on your {col.TAG}║
 ║ {col.WHITE}Discord profile. Be sure you have the following {col.TAG}║
 ║ {col.WHITE}info ready to configure your rich presence with {col.TAG}║
@@ -287,20 +293,19 @@ buddies to see on your Discord profile.
     config.set('RPC_details', 'rpc_application_id', RPC_application_id)
     config.set('RPC_details', 'rpc_title', rpc_title)
     config.set('RPC_details', 'rpc_desc', rpc_desc)
-    with open('RPC_Config.ini', 'w') as f:
+    with open(RCP_Config_dot_ini, 'w') as f:
         config.write(f)
-    time.sleep(1) # wait because further functions read too early, saying the config doesn't exist while it was just created.
+    time.sleep(1) # wait because following functions read too early, saying the config doesn't exist while it was just created.
 
 def SetupNewRPC():
     # start with clean terminal
     clear()
-
     CompileConfig()
 
 def ConfigCheck():
     clear()
     try:
-        open('RPC_Config.ini', 'r').close()
+        open(RCP_Config_dot_ini, 'r').close()
         YesOrNo = Terminal.prompt(f"\n{col.TAG}{col.BOLD}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗\n║ 🎫  {col.WHITE}Rich Presence Tool  {col.TAG}🎫  ║\n║ {col.OKGREEN}A rich presence was set up !{col.TAG}║\n╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝\nDo you wish to Use, Change or View this?\n{col.YELLOW}1. {col.OKGREEN}(Use)\n{col.YELLOW}2. {col.RED}(Change)\n{col.YELLOW}3. {col.OKCYAN}(View)\n{col.YELLOW}4. {col.DRED}(Exit)\n\n{col.TAG}Make a choice {col.WHITE}({col.OKGREEN}1 {col.WHITE}/ {col.RED}2 {col.WHITE}/ {col.OKCYAN}3 {col.WHITE}/ {col.DRED}4{col.WHITE})> {col.OKGREEN}{col.BOLD}", allowed_replies=('1', '2', '3', '4'))
         if YesOrNo.lower() == '1':
             pass
@@ -313,8 +318,8 @@ def ConfigCheck():
         elif YesOrNo.lower() == '3':
                 try:
                     clear()
-                    open('RPC_Config.ini', 'r')
-                    config.read('RPC_Config.ini')
+                    open(RCP_Config_dot_ini, 'r')
+                    config.read(RCP_Config_dot_ini)
 
                     rpc_application_id  = config['RPC_details']['rpc_application_id']
                     rpc_desc            = config['RPC_details']['rpc_desc']
@@ -515,8 +520,8 @@ def RPC2buttons(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1, btnlb
 
 def LaunchRichPresence():
     try:
-        open('RPC_Config.ini', 'r')
-        config.read('RPC_Config.ini')
+        open(RCP_Config_dot_ini, 'r')
+        config.read(RCP_Config_dot_ini)
 
         rpc_application_id  = config['RPC_details']['rpc_application_id']
         rpc_desc            = config['RPC_details']['rpc_desc']
