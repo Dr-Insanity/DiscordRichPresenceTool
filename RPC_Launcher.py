@@ -10,7 +10,7 @@ from DiscordRPCT.functs import Functs
 
 ranAs_Service = False
 appdata_folder = getenv('APPDATA')
-RCP_Config_dot_ini = f"{appdata_folder}/Discord-Rich-Presence-Tool/RPC_Config.ini"
+RCP_Config_dot_ini = f"{appdata_folder}\Discord-Rich-Presence-Tool\RPC_Config.ini"
 
 def prepArgs():
     if len(argv) == 1:
@@ -112,14 +112,15 @@ def ASK_RPC_WantButtons():
     else:
         clear()
         print(
-f"""{col.RED}
+"""{}
 ╔═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ❌    {col.WHITE}Invalid reply{col.RED}    ❌ ║
+║ ❌    {}Invalid reply{}    ❌ ║
 ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-{col.WHITE}Your choices are:
-- {col.WHITE}({col.OKGREEN}y{col.WHITE})es - Set up buttons for my rich presence.
-- {col.WHITE}({col.RED}n{col.WHITE})o - Do not set up buttons on my rich presence.""")
+{}Your choices are:
+- {}({}y{})es - Set up buttons for my rich presence.
+- {}({}n{})o - Do not set up buttons on my rich presence.""".format(col.RED, col.WHITE, col.RED, col.WHITE, col.WHITE, col.OKGREEN, col.WHITE, col.WHITE, col.WHITE))
         ASK_RPC_WantButtons()
+
 def ASK_RPC_NumbOfButtons():
     RPC_Buttons_HowMany = input(f"{col.TAG}{col.BOLD}[{col.WHITE}Rich Presence{col.TAG}][{col.OKGREEN}setup{col.TAG}] {col.UNBOLD}{col.WHITE}How many buttons do you want on your rich presence? (1-2, choose one)>  {col.OKGREEN}{col.BOLD}")
     if str(RPC_Buttons_HowMany) == '1':
@@ -190,6 +191,7 @@ def ask_rpc_2ndbutton_label():
 def ask_rpc_2ndbutton_URL():
     RPC_Single_Button_LabelText = input(f"{col.TAG}{col.BOLD}[{col.WHITE}Rich Presence{col.TAG}][{col.OKGREEN}setup{col.TAG}]{col.TAG}[{col.WHITE}2/2 button{col.TAG}] {col.UNBOLD}{col.WHITE}Which URL shall be shared> {col.OKGREEN}{col.BOLD}")
     return RPC_Single_Button_LabelText
+
 def ASK_RPC_Buttons():
 
     """
@@ -288,7 +290,7 @@ buddies to see on your Discord profile.
 ║          🎫     {col.BOLD}Rich Presence Tool     🎫       ║
 ║ {col.WHITE}           The configuration is {col.OKGREEN}done {col.TAG}           ║
 ║ {col.WHITE}           Config will be saved at:{col.TAG}             ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝\n             {col.WHITE}{getcwd()}""")
+╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝\n             {col.WHITE}{RCP_Config_dot_ini}""")
     input(f'{col.WHITE}{col.UNBOLD}Hit enter save and\nto launch your custom-made Rich Presence\non your Discord profile... ')
     config.set('RPC_details', 'rpc_application_id', RPC_application_id)
     config.set('RPC_details', 'rpc_title', rpc_title)
@@ -450,6 +452,7 @@ def RPCWithoutButtons(rpc_application_id, rpc_title, rpc_desc):
         RPC.connect() # Start the handshake loop
 
         RichPresenceData = (RPC.update(state=rpc_title, details=rpc_desc))  # Set the presence
+        print(RichPresenceData)
         
         print(f"""{col.OKGREEN}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
 ║ ✅{col.BOLD}{col.WHITE} Looking good! {col.TAG}RichPresence {col.WHITE}is {col.OKGREEN}UP {col.WHITE}and {col.YELLOW}shining {col.WHITE}on your profile! ✅{col.OKGREEN} ║
