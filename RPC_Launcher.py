@@ -6,11 +6,11 @@ from configparser import ConfigParser, DuplicateSectionError
 from DiscordRPCT.terminal import Terminal, Options
 from DiscordRPCT.checks import Checks
 from DiscordRPCT.bcolors import Bcolors as col
-from DiscordRPCT.functs import Functs
+from DiscordRPCT.functs import Functs, launch_notification
 
 ranAs_Service = False
 appdata_folder = getenv('APPDATA')
-RCP_Config_dot_ini = f"{appdata_folder}\Discord-Rich-Presence-Tool\RPC_Config.ini"
+RCP_Config_dot_ini = f"{appdata_folder}/Discord-Rich-Presence-Tool/RPC_Config.ini"
 
 def prepArgs():
     if len(argv) == 1:
@@ -33,6 +33,8 @@ def prepArgs():
         Func.manpage1(mainexecutable=basename(__file__), message=None)
         exit(0)
     if '-s' in argv:
+        print(f'{col.BOLD}{col.TAG}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}Starting as service, sending notification')
+        launch_notification()
         global ranAs_Service
         ranAs_Service = True
 
@@ -417,6 +419,24 @@ def checkIfProcessRunning(processName):
             pass
     return False
 
+def connect_to_rpc(presence: Presence):
+    connected = False
+    rpc_prot_offline = True
+
+    open(RCP_Config_dot_ini, 'r')
+    config.read(RCP_Config_dot_ini)
+
+    while rpc_prot_offline:
+        try:
+            presence.connect() # Start the handshake loop
+            rpc_prot_offline = False
+            connected = True
+        except:
+            time.sleep(1)
+    
+    return connected
+
+
 def main():
     while True:
         if checkIfProcessRunning('Discord'):
@@ -426,11 +446,11 @@ def main():
             try:
                 LaunchRichPresence()
             
-            except exceptions.InvalidPipe:
+            except exceptions.DiscordNotFound:
                 # need to wait a bit before Discord is reading rich presence from any game / app
                 # let's wait max 20 seconds so we give Discord client the time before we shoot our rich presence.
                 Terminal.announce('Waiting for Discord to listen for rich presence . . .')
-                time.sleep(20)
+                time.sleep(1)
 
                 # Let's give it a shot now, launching Rich Presence
                 try:
@@ -440,38 +460,40 @@ def main():
 
         else:
             print(f'{col.BOLD}{col.TAG}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}Waiting for Discord to launch . . .')
-
-            time.sleep(5) # don't spam the console, print the above line only per 5 seconds.
-
-            # re-check every 5 seconds by calling the function over until Discord is spotted and running.
+            time.sleep(5)
             main()
 
-def RPCWithoutButtons(rpc_application_id, rpc_title, rpc_desc):
-        client_id = rpc_application_id
-        RPC = Presence(client_id)  # Initialize the client class
-        RPC.connect() # Start the handshake loop
-
-        RichPresenceData = (RPC.update(state=rpc_title, details=rpc_desc))  # Set the presence
-        print(RichPresenceData)
-        
-        print(f"""{col.OKGREEN}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
+rpc_connected_text = f"""{col.OKGREEN}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
 ║ ✅{col.BOLD}{col.WHITE} Looking good! {col.TAG}RichPresence {col.WHITE}is {col.OKGREEN}UP {col.WHITE}and {col.YELLOW}shining {col.WHITE}on your profile! ✅{col.OKGREEN} ║
 ╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
 {col.YELLOW}If not, check if you have the following option enabled in Discord:
 {col.BOLD}{col.WHITE}User Settings > Activity Status > Display current activity as a status message.
 
 {col.BOLD}{col.YELLOW}These settings were applied on your Rich Presence:
+"""
+
+def RPCWithoutButtons(rpc_application_id, rpc_title, rpc_desc):
+        client_id = rpc_application_id
+        RPC = Presence(client_id)
+        connect_to_rpc(RPC)
+        RichPresenceData = (RPC.update(state=rpc_title, details=rpc_desc))
+        
+        print(f"""{rpc_connected_text}
 {col.YELLOW}{col.BOLD}Title: {col.WHITE}--------> {col.OKCYAN}{rpc_title}
 {col.YELLOW}{col.BOLD}Description: {col.WHITE}--> {col.OKCYAN}{rpc_desc}
 {col.YELLOW}{col.BOLD}App ID: {col.WHITE}-------> {col.OKCYAN}*censored*""")
         
         while True:  # The presence will stay on as long as the program is running
-            time.sleep(15) # Can only update rich presence every 15 seconds
+            try:
+                time.sleep(15) # Can only update rich presence every 15 seconds
+            except KeyboardInterrupt or EOFError:
+                print(f'{col.BOLD}{col.TAG}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}Exiting. Goodbye!')
+                exit(0)
 
 def RPC1button(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1):
         client_id = rpc_application_id
         RPC = Presence(client_id)  # Initialize the client class
-        RPC.connect() # Start the handshake loop
+        connect_to_rpc(RPC)
 
         RichPresenceData = (RPC.update(state=f"{rpc_title}", details=f"{rpc_desc}", buttons=[{"label": f"{btnlbl1}", "url": f"{btnurl1}"}]))  # Set the presence
         
@@ -495,11 +517,11 @@ def RPC1button(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1):
 def RPC2buttons(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1, btnlbl2, btnurl2):
         client_id = rpc_application_id
         RPC = Presence(client_id)  # Initialize the client class
-        RPC.connect() # Start the handshake loop
+        connect_to_rpc(RPC)
 
         click_me = [{"label": f"{btnlbl1}", "url": f"{btnurl1}"}, {"label": f"{btnlbl2}", "url": f"{btnurl2}"}]
 
-        RichPresenceData = (RPC.update(state=f"{rpc_title}", details=f"{rpc_desc}", buttons=click_me))  # Set the presence
+        RichPresenceData = (RPC.update(state=f"{rpc_title}", details=f"{rpc_desc}", buttons=click_me))
         
         print(
     f"""{col.OKGREEN}

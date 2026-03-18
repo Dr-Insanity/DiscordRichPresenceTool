@@ -1,4 +1,8 @@
+import asyncio
 from DiscordRPCT.bcolors import Bcolors as col
+from win11toast import toast_async
+import contextlib
+from pathlib import Path
 
 class Functs:
     @staticmethod
@@ -23,3 +27,27 @@ OPTION          DESCRIPTION
 -s              No checks, no prompts, just run. Useful for running this as a service in the background.
 {col.ENDC}"""
         print(helppage1)
+
+def dummy(args):
+    option = args.get("user_input").get("selection")
+    print(option)
+
+def launch_notification():
+    async def coroutin():
+        icon = {
+            'src': Path('DiscordRPCT/icon.png').absolute().as_uri(),
+            'placement': 'appLogoOverride'
+        }
+        i = await toast_async(
+            "Running in the system tray", 
+            "Choose an option. Alternatively, ignore this notification",
+            app_id='Discord Rich Presence', 
+            icon=icon, 
+            selection=['Open RPC', 'Pause status', 'Edit RPC'], 
+            button='Submit',
+            on_click=dummy,
+            duration=None,
+
+        )
+        return i
+    result = asyncio.run(coroutin())
