@@ -1,3 +1,4 @@
+import asyncio
 from os import getcwd, getenv
 from os.path import basename
 from sys import argv, exit
@@ -7,10 +8,46 @@ from DiscordRPCT.terminal import Terminal, Options
 from DiscordRPCT.checks import Checks
 from DiscordRPCT.bcolors import Bcolors as col
 from DiscordRPCT.functs import Functs, launch_notification
+import threading
+from pystray import Icon, Menu, MenuItem
+from PIL import Image
 
+tray_icon = None
+rpc_paused = False
 ranAs_Service = False
 appdata_folder = getenv('APPDATA')
 RCP_Config_dot_ini = f"{appdata_folder}/Discord-Rich-Presence-Tool/RPC_Config.ini"
+
+def tray_open(icon, item):
+    print("Opening config menu...")
+    ConfigCheck()
+
+def tray_pause(icon, item):
+    global rpc_paused
+
+    rpc_paused = not rpc_paused
+    state = "Paused" if rpc_paused else "Running"
+    print(f"RPC is now: {state}")
+
+def tray_exit(icon, item):
+    print("Exiting from tray...")
+    icon.stop()
+    exit(0)
+
+def create_tray():
+    image = Image.open("DiscordRPCT/icon.png")
+
+    menu = Menu(
+        MenuItem("Open RPC Menu", tray_open),
+        MenuItem("Pause / Resume RPC", tray_pause),
+        MenuItem("Exit", tray_exit)
+    )
+
+    tray_icon = Icon("RPC Tool", image, "Discord RPC Tool", menu)
+    tray_icon.run()
+
+def launch_tray():
+    threading.Thread(target=create_tray, daemon=True).start()
 
 def prepArgs():
     if len(argv) == 1:
@@ -34,7 +71,11 @@ def prepArgs():
         exit(0)
     if '-s' in argv:
         print(f'{col.BOLD}{col.TAG}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}Starting as service, sending notification')
-        launch_notification()
+        threading.Thread(
+            target=lambda: asyncio.run(launch_notification()),
+            daemon=True
+        ).start()
+        launch_tray()
         global ranAs_Service
         ranAs_Service = True
 
@@ -436,7 +477,6 @@ def connect_to_rpc(presence: Presence):
     
     return connected
 
-
 def main():
     while True:
         if checkIfProcessRunning('Discord'):
@@ -472,76 +512,51 @@ rpc_connected_text = f"""{col.OKGREEN}╔═─═─═─═─═─═─═
 {col.BOLD}{col.YELLOW}These settings were applied on your Rich Presence:
 """
 
-def RPCWithoutButtons(rpc_application_id, rpc_title, rpc_desc):
-        client_id = rpc_application_id
-        RPC = Presence(client_id)
-        connect_to_rpc(RPC)
-        RichPresenceData = (RPC.update(state=rpc_title, details=rpc_desc))
-        
-        print(f"""{rpc_connected_text}
-{col.YELLOW}{col.BOLD}Title: {col.WHITE}--------> {col.OKCYAN}{rpc_title}
-{col.YELLOW}{col.BOLD}Description: {col.WHITE}--> {col.OKCYAN}{rpc_desc}
-{col.YELLOW}{col.BOLD}App ID: {col.WHITE}-------> {col.OKCYAN}*censored*""")
-        
-        while True:  # The presence will stay on as long as the program is running
-            try:
-                time.sleep(15) # Can only update rich presence every 15 seconds
-            except KeyboardInterrupt or EOFError:
-                print(f'{col.BOLD}{col.TAG}[{col.WHITE}Rich Presence{col.TAG}] {col.WHITE}Exiting. Goodbye!')
-                exit(0)
+def run_rpc(client_id, title, desc, buttons=None):
+    global rpc_paused
 
-def RPC1button(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1):
-        client_id = rpc_application_id
-        RPC = Presence(client_id)  # Initialize the client class
-        connect_to_rpc(RPC)
+    RPC = Presence(client_id)
+    connect_to_rpc(RPC)
 
-        RichPresenceData = (RPC.update(state=f"{rpc_title}", details=f"{rpc_desc}", buttons=[{"label": f"{btnlbl1}", "url": f"{btnurl1}"}]))  # Set the presence
-        
-        print(f"""{col.OKGREEN}╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ✅{col.BOLD}{col.WHITE} Looking good! {col.TAG}RichPresence {col.WHITE}is {col.OKGREEN}UP {col.WHITE}and {col.YELLOW}shining {col.WHITE}on your profile! ✅{col.OKGREEN} ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-{col.YELLOW}If not, check if you have the following option enabled in Discord:
-{col.BOLD}{col.WHITE}User Settings > Activity Status > Display current activity as a status message.
+    was_paused = False
 
-{col.BOLD}{col.YELLOW}These settings were applied on your Rich Presence:
-{col.YELLOW}{col.BOLD}Title: {col.WHITE}--------> {col.OKCYAN}{rpc_title}
-{col.YELLOW}{col.BOLD}Description: {col.WHITE}--> {col.OKCYAN}{rpc_desc}
-{col.YELLOW}{col.BOLD}App ID: {col.WHITE}-------> {col.OKCYAN}*****************
-{col.YELLOW}{col.BOLD}Buttons
-{col.YELLOW}{col.BOLD}First Button Label: {col.WHITE}--> {col.OKCYAN}{btnlbl1}
-{col.YELLOW}{col.BOLD}First Button Shared URL: {col.WHITE}--> {col.OKCYAN}{btnurl1}""")
+    while True:
+        if rpc_paused:
+            if not was_paused:
+                print("Pausing RPC...")
+                RPC.clear()
+                was_paused = True
 
-        while True:  # The presence will stay on as long as the program is running
-            time.sleep(15) # Can only update rich presence every 15 seconds
+            time.sleep(1)
+            continue
 
-def RPC2buttons(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1, btnlbl2, btnurl2):
-        client_id = rpc_application_id
-        RPC = Presence(client_id)  # Initialize the client class
-        connect_to_rpc(RPC)
+        if was_paused:
+            print("Resuming RPC...")
+            was_paused = False
 
-        click_me = [{"label": f"{btnlbl1}", "url": f"{btnurl1}"}, {"label": f"{btnlbl2}", "url": f"{btnurl2}"}]
+        payload = {
+            "state": title,
+            "details": desc
+        }
 
-        RichPresenceData = (RPC.update(state=f"{rpc_title}", details=f"{rpc_desc}", buttons=click_me))
-        
-        print(
-    f"""{col.OKGREEN}
-╔═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╗                        
-║ ✅{col.BOLD}{col.WHITE} Looking good! {col.TAG}RichPresence {col.WHITE}is {col.OKGREEN}UP {col.WHITE}and {col.YELLOW}shining {col.WHITE}on your profile! ✅{col.OKGREEN} ║
-╚═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═─═╝
-{col.YELLOW}If not, check if you have the following option enabled in Discord:
-{col.BOLD}{col.WHITE}User Settings > Activity Status > Display current activity as a status message.
+        if buttons:
+            payload["buttons"] = buttons
 
-{col.BOLD}{col.YELLOW}These settings were applied on your Rich Presence:
-{col.YELLOW}{col.BOLD}Title: {col.WHITE}--------> {col.OKCYAN}{rpc_title}
-{col.YELLOW}{col.BOLD}Description: {col.WHITE}--> {col.OKCYAN}{rpc_desc}
-{col.YELLOW}{col.BOLD}App ID: {col.WHITE}-------> {col.OKCYAN}*****************
-{col.YELLOW}{col.BOLD}Buttons
-{col.YELLOW}{col.BOLD}First Button Label: {col.WHITE}--> {col.OKCYAN}{btnlbl1}
-{col.YELLOW}{col.BOLD}First Button Shared URL: {col.WHITE}--> {col.OKCYAN}{btnurl1}
-{col.YELLOW}{col.BOLD}Second Button Label: {col.WHITE}--> {col.OKCYAN}{btnlbl2}
-{col.YELLOW}{col.BOLD}Second Button Shared URL: {col.WHITE}--> {col.OKCYAN}{btnurl2}""")
-        while True:  # The presence will stay on as long as the program is running
-            time.sleep(15) # Can only update rich presence every 15 seconds
+        RPC.update(**payload)
+
+        print(rpc_connected_text)
+        for key, value in payload.items():
+            if key == "buttons":
+                print(f"{col.YELLOW}{col.BOLD}Buttons:")
+                for idx, button in enumerate(value, start=1):
+                    print(f"{col.YELLOW}{col.BOLD}Button {idx}: {col.WHITE}Label: {col.OKCYAN}{button['label']} {col.WHITE}| URL: {col.OKCYAN}{button['url']}")
+            else:
+                print(f"{col.YELLOW}{col.BOLD}{key.capitalize()}: {col.WHITE}{value}")
+        # responsive sleep
+        for _ in range(15):
+            if rpc_paused:
+                break
+            time.sleep(1)
 
 def LaunchRichPresence():
     try:
@@ -556,7 +571,7 @@ def LaunchRichPresence():
         if amount_of_buttons == "1":
             btnlbl1             = config['RPC_details']['btnlbl1']
             btnurl1             = config['RPC_details']['btnurl1']
-            RPC1button(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1)
+            run_rpc(rpc_application_id, rpc_title, rpc_desc, [{"label": btnlbl1, "url": btnurl1}])
 
         elif amount_of_buttons == "2":
             btnlbl1             = config['RPC_details']['btnlbl1'] # button label #1
@@ -564,10 +579,10 @@ def LaunchRichPresence():
             btnlbl2             = config['RPC_details']['btnlbl2'] # button label #2
             btnurl2             = config['RPC_details']['btnurl2'] # button URL #2
 
-            RPC2buttons(rpc_application_id, rpc_title, rpc_desc, btnlbl1, btnurl1, btnlbl2, btnurl2)
+            run_rpc(rpc_application_id, rpc_title, rpc_desc, [{"label": btnlbl1, "url": btnurl1}, {"label": btnlbl2, "url": btnurl2}])
         else:
             if amount_of_buttons == "0":
-                RPCWithoutButtons(rpc_application_id, rpc_title, rpc_desc)
+                run_rpc(rpc_application_id, rpc_title, rpc_desc)
     except FileNotFoundError:
         clear()
         print(

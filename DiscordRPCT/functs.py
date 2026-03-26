@@ -28,11 +28,11 @@ OPTION          DESCRIPTION
 {col.ENDC}"""
         print(helppage1)
 
-def dummy(args):
+async def dummy(args):
     option = args.get("user_input").get("selection")
     print(option)
 
-def launch_notification():
+async def launch_notification():
     async def coroutin():
         icon = {
             'src': Path('DiscordRPCT/icon.png').absolute().as_uri(),
@@ -40,14 +40,12 @@ def launch_notification():
         }
         i = await toast_async(
             "Running in the system tray", 
-            "Choose an option. Alternatively, ignore this notification",
+            "Head over to the system tray to interact with Discord Rich Presence Tool",
             app_id='Discord Rich Presence', 
             icon=icon, 
-            selection=['Open RPC', 'Pause status', 'Edit RPC'], 
-            button='Submit',
             on_click=dummy,
             duration=None,
-
         )
         return i
-    result = asyncio.run(coroutin())
+    result = asyncio.create_task(coroutin())
+    return result
